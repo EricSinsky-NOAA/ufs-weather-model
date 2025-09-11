@@ -15,6 +15,13 @@ elif [[ ${MACHINE_ID} = hera ]] ; then
     fi
     module purge
 
+elif [[ ${MACHINE_ID} = ursa ]] ; then
+    # We are on NOAA Ursa
+    if ( ! eval module help > /dev/null 2>&1 ) ; then
+        source /apps/lmod/lmod/init/bash
+    fi
+    module purge
+
 elif [[ ${MACHINE_ID} = orion ]] ; then
     # We are on Orion
     if ( ! eval module help > /dev/null 2>&1 ) ; then
@@ -74,6 +81,11 @@ elif [[ ${MACHINE_ID} = gaeac6 ]]; then
         source /opt/cray/pe/lmod/lmod/init/bash
     fi
     module reset
+
+elif [[ ${MACHINE_ID} = container ]] ; then
+    # We are in a container
+    source /usr/lmod/lmod/init/bash
+    module purge
 
 elif [[ ${MACHINE_ID} = noaacloud ]] ; then
     # We are on NOAA Cloud

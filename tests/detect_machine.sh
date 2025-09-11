@@ -8,6 +8,12 @@
 #
 # Thank you for your contribution
 
+# Overwrite auto-detect if in container
+if [[ -d /opt/spack-stack && -v SINGULARITY_CONTAINER ]]; then
+  # We are in a container
+  MACHINE_ID=container
+fi
+
 # If the MACHINE_ID variable is set, skip this script.
 [[ -n ${MACHINE_ID:-} ]] && return
 
@@ -29,6 +35,11 @@ case $(hostname -f) in
   hfe0[1-9]) MACHINE_ID=hera ;; ### hera01-09
   hfe1[0-2]) MACHINE_ID=hera ;; ### hera10-12
   hecflow01) MACHINE_ID=hera ;; ### heraecflow01
+  
+  ufe01) MACHINE_ID=ursa ;; ### ursa
+  ufe02) MACHINE_ID=ursa ;; ### ursa
+  ufe03) MACHINE_ID=ursa ;; ### ursa
+  ufe04) MACHINE_ID=ursa ;; ### ursa
 
   s4-submit.ssec.wisc.edu) MACHINE_ID=s4 ;; ### s4
 
@@ -65,6 +76,12 @@ fi
 # Overwrite auto-detect with MACHINE if set
 MACHINE_ID=${MACHINE:-${MACHINE_ID}}
 
+# Overwrite auto-detect if in container
+if [[ -d /opt/spack-stack && -v SINGULARITY_CONTAINER ]]; then
+  # We are in a container
+  MACHINE_ID=container
+fi
+
 # If MACHINE_ID is no longer UNKNNOWN, return it
 if [[ "${MACHINE_ID}" != "UNKNOWN" ]]; then
   return
@@ -80,9 +97,15 @@ elif [[ -d /lfs/h1 && ! -d /lfs/h3 ]]; then
 elif [[ -d /mnt/lfs1 ]]; then
   # We are on NOAA Jet
   MACHINE_ID=jet
-elif [[ -d /scratch1 ]]; then
-  # We are on NOAA Hera
-  MACHINE_ID=hera
+elif [[ -d /scratch3 ]]; then
+  # We are on NOAA Hera or Ursa
+  mount=$(findmnt -n -o SOURCE /home)   
+  if [[ ${mount} =~ "ursa" ]]; then
+    # We are on ursa
+    MACHINE_ID=ursa
+  elif [[ ${mount} =~ "hera" ]]; then
+    MACHINE_ID=hera
+  fi
 elif [[ -d /work ]]; then
   # We are on MSU Orion or Hercules
   mount=$(findmnt -n -o SOURCE /home)   
@@ -101,6 +124,9 @@ elif [[ -d /gpfs/f6 && -d /ncrc ]]; then
 elif [[ -d /data/prod ]]; then
   # We are on SSEC's S4
   MACHINE_ID=s4
+elif [[ -d /opt/spack-stack && -v SINGULARITY_CONTAINER ]]; then
+  # We are in a container
+  MACHINE_ID=container
 else
   echo WARNING: UNKNOWN PLATFORM 1>&2
 fi
